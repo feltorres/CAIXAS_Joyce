@@ -107,9 +107,9 @@ if st.button("Calcular"):
         preco_unit_1000 = peso_unit_kg * preco_efetivo_1000
         valor_1000 = qtd_1000 * preco_unit_1000
         
-        # Cálculos para recibo (baseado na quantidade total orçada)
+        # Cálculos para recibo (baseado em 300kg)
         preco_unit_recibo = peso_unit_kg * preco_efetivo_recibo
-        valor_recibo = qtd * preco_unit_recibo
+        valor_recibo = qtd_300 * preco_unit_recibo
         
         st.markdown("""
         <style>
@@ -196,7 +196,7 @@ if st.button("Calcular"):
             </div>
             <div class="linha-separadora"></div>
             <div class="ref-linha texto-recibo" style="margin-bottom: 0;">
-                Preço Mediante Recibo ({formata_qtd(qtd)} un) &nbsp;&nbsp;|&nbsp;&nbsp; Preço unitário: {formata_moeda(preco_unit_recibo)} &nbsp;&nbsp;|&nbsp;&nbsp; Total: {formata_moeda(valor_recibo)}
+                Preço Mediante Recibo ({formata_qtd(qtd_300)} un) &nbsp;&nbsp;|&nbsp;&nbsp; Preço unitário: {formata_moeda(preco_unit_recibo)} &nbsp;&nbsp;|&nbsp;&nbsp; Total: {formata_moeda(valor_recibo)}
             </div>
         </div>
         """, unsafe_allow_html=True)
