@@ -320,7 +320,7 @@ if st.button("Calcular"):
             st.markdown(html_recibo, unsafe_allow_html=True)
 
             # Construção da string para o WhatsApp
-            whatsapp_msg = ""
+            whatsapp_msg = "Segue seu orçamento, conforme solicitado:\n\n"
             for i, r in enumerate(resultados):
                 is_chapa = r['modelo'] in ["Cinta-Tab-Chapa", "Corte e Vinco"]
                 if is_chapa:
@@ -328,22 +328,18 @@ if st.button("Calcular"):
                 else:
                     dim_str = f"C {r['c']} x L {r['l']} x A {r['a']} mm"
                 
-                whatsapp_msg += f"*{r['nome']} - {r['modelo']}*\n"
-                whatsapp_msg += f"📏 {dim_str} - Gramatura {r['gramatura']}g\n"
-                whatsapp_msg += f"📦 Quantidade: {formata_qtd(r['qtd'])} un\n"
-                whatsapp_msg += f"💲 Preço Unitário: {formata_moeda(r['preco_unit'])}\n"
-                whatsapp_msg += f"💰 Valor total: {formata_moeda(r['preco_total'])}\n"
-                
-                if i < len(resultados) - 1:
-                    whatsapp_msg += "\n"
+                whatsapp_msg += f"📦{r['nome']} - {r['modelo']}\n"
+                whatsapp_msg += f" {dim_str} - Gramatura {r['gramatura']}g\n"
+                whatsapp_msg += f"* Quantidade: {formata_qtd(r['qtd'])} un\n"
+                whatsapp_msg += f"* Preço Unitário: {formata_moeda(r['preco_unit'])}\n"
+                whatsapp_msg += f"* Valor total: {formata_moeda(r['preco_total'])}\n\n"
             
-            whatsapp_msg += "\n\n"
-            whatsapp_msg += "🖨️ ____ IMPRESSÃO \n"
-            whatsapp_msg += "🗓️ Prazo de Produção - 20 a 25 dias ÚTEIS \n"
-            whatsapp_msg += "🚚 FRETE CIF - BH E REGIÃO \n"
-            whatsapp_msg += "🧾 IPI - 0%"
+            whatsapp_msg += "* __ IMPRESSÃO\n"
+            whatsapp_msg += "* Prazo de Produção - 20 a 25 dias ÚTEIS\n"
+            whatsapp_msg += "* IPI - 0%\n\n"
+            whatsapp_msg += "🚚 FRETE CIF - BH E REGIÃO\n\n"
+            whatsapp_msg += "Obs: as medidas apresentadas são internas."
 
-            # Renderização visual do box azul para o texto
             st.markdown("""
             <div class="card-azul" style="margin-top: 10px; margin-bottom: 5px;">
                 <div class="header-azul" style="margin-bottom: 5px; border: none;">📱 Mensagem para WhatsApp</div>
@@ -351,5 +347,4 @@ if st.button("Calcular"):
             </div>
             """, unsafe_allow_html=True)
             
-            # st.code renderiza o bloco com um botão de cópia rápido
             st.code(whatsapp_msg, language="markdown")
