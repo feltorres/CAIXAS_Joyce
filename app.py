@@ -18,7 +18,6 @@ def remover_item(item_id):
 
 st.sidebar.header("Parâmetros Base")
 preco_kg = st.sidebar.number_input("Preço do KG do Papelão (R$)", min_value=0.0, value=0.0, step=0.1)
-gramatura = st.sidebar.number_input("Gramatura (g/m²)", min_value=0, value=378, step=1)
 
 st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
 st.sidebar.markdown("**Preços para Negociação (Opcional)**")
@@ -42,8 +41,8 @@ opcoes_modelos = [
 for idx, item_id in enumerate(st.session_state.item_ids):
     st.markdown(f"**Item {idx+1}**")
     
-    # 6 Colunas: A última para o botão de remoção (X vermelho)
-    col1, col2, col3, col4, col5, col6 = st.columns([2.5, 1, 1, 1, 1, 0.5])
+    # 7 Colunas para abrigar a Gramatura entre Modelo e C
+    col1, col2, col3, col4, col5, col6, col7 = st.columns([2.2, 1.3, 1, 1, 1, 1, 0.5])
     
     with col1:
         modelo = st.selectbox("Modelo", opcoes_modelos, key=f"mod_{item_id}")
@@ -51,14 +50,16 @@ for idx, item_id in enumerate(st.session_state.item_ids):
     is_chapa = modelo in ["Cinta-Tab-Chapa", "Corte e Vinco"]
     
     with col2:
-        c = st.number_input("C (mm)", min_value=0, value=240, step=1, key=f"c_{item_id}")
+        gramatura = st.number_input("Gramat. (g/m²)", min_value=1, value=378, step=1, key=f"gram_{item_id}")
     with col3:
-        l = st.number_input("L (mm)", min_value=0, value=180, step=1, key=f"l_{item_id}")
+        c = st.number_input("C (mm)", min_value=0, value=240, step=1, key=f"c_{item_id}")
     with col4:
-        a = st.number_input("A (mm)", min_value=0, value=0 if is_chapa else 175, step=1, disabled=is_chapa, key=f"a_{item_id}")
+        l = st.number_input("L (mm)", min_value=0, value=180, step=1, key=f"l_{item_id}")
     with col5:
-        qtd = st.number_input("Qtd", min_value=1, value=2500, step=1, key=f"q_{item_id}")
+        a = st.number_input("A (mm)", min_value=0, value=0 if is_chapa else 175, step=1, disabled=is_chapa, key=f"a_{item_id}")
     with col6:
+        qtd = st.number_input("Qtd", min_value=1, value=2500, step=1, key=f"q_{item_id}")
+    with col7:
         st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
         st.button("❌", key=f"rm_{item_id}", on_click=remover_item, args=(item_id,), disabled=len(st.session_state.item_ids) == 1, help="Remover este item")
         
@@ -78,6 +79,7 @@ for idx, item_id in enumerate(st.session_state.item_ids):
     itens_para_calcular.append({
         'nome': f"Item {idx+1}",
         'modelo': modelo,
+        'gramatura': gramatura,
         'c': c, 'l': l, 'a': a, 'qtd': qtd,
         'transp_sup': transp_sup, 'transp_inf': transp_inf,
         'desc': desc
@@ -99,8 +101,8 @@ def formata_qtd(quantidade):
     return f"{quantidade:,}".replace(",", ".")
 
 if st.button("Calcular"):
-    if preco_kg <= 0 or gramatura <= 0:
-        st.error("Insira os parâmetros base (Preço e Gramatura maiores que zero).")
+    if preco_kg <= 0:
+        st.error("Insira o Preço do KG base maior que zero na barra lateral.")
     else:
         resultados = []
         valor_total_pedido = 0.0
@@ -129,7 +131,7 @@ if st.button("Calcular"):
                 area_m2 = ((c + 30) * (l + 30)) / 1000000
             
             if area_m2 > 0:
-                peso_unit_kg = (area_m2 * gramatura) / 1000
+                peso_unit_kg = (area_m2 * it['gramatura']) / 1000
                 peso_total_kg = peso_unit_kg * it['qtd']
                 
                 preco_unit = peso_unit_kg * preco_kg
