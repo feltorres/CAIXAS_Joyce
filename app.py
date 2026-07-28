@@ -10,9 +10,6 @@ if 'num_itens' not in st.session_state:
 def adicionar_item():
     st.session_state.num_itens += 1
 
-def resetar_itens():
-    st.session_state.num_itens = 1
-
 st.sidebar.header("Parâmetros Base")
 preco_kg = st.sidebar.number_input("Preço do KG do Papelão (R$)", min_value=0.0, value=0.0, step=0.1)
 gramatura = st.sidebar.number_input("Gramatura (g/m²)", min_value=0, value=378, step=1)
@@ -23,64 +20,62 @@ preco_300 = st.sidebar.number_input("Preço do KG para 300kg (R$)", min_value=0.
 preco_1000 = st.sidebar.number_input("Preço do KG para 1000kg (R$)", min_value=0.0, value=11.50, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
 preco_recibo = st.sidebar.number_input("Preço do KG mediante recibo (R$)", min_value=0.0, value=11.20, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
 
-tipo_produto = st.radio("O que deseja orçar?", ["Caixa Maleta (Modelos Específicos)", "Chapa / Corte e Vinco"], on_change=resetar_itens)
-
 st.markdown("---")
 
 itens_para_calcular = []
+opcoes_modelos = [
+    "Abas Normais", 
+    "Aba Dupla / Total", 
+    "Aba Dupla Inferior ou Superior", 
+    "Sem Aba Superior", 
+    "Transpassadas",
+    "Cinta-Tab-Chapa", 
+    "Corte e Vinco"
+]
 
-if tipo_produto == "Caixa Maleta (Modelos Específicos)":
-    for i in range(st.session_state.num_itens):
-        st.markdown(f"**Caixa {i+1}**")
-        col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+for i in range(st.session_state.num_itens):
+    st.markdown(f"**Item {i+1}**")
+    
+    # Linha principal de inputs
+    col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+    
+    with col1:
+        modelo = st.selectbox("Modelo", opcoes_modelos, key=f"mod_{i}")
         
-        with col1:
-            modelo = st.selectbox("Modelo", ["Abas Normais", "Aba Dupla / Total", "Aba Dupla Inferior ou Superior", "Sem Aba Superior", "Transpassadas"], key=f"mod_cx_{i}")
-        with col2:
-            c = st.number_input("C (mm)", min_value=0, value=240, step=1, key=f"c_cx_{i}")
-        with col3:
-            l = st.number_input("L (mm)", min_value=0, value=180, step=1, key=f"l_cx_{i}")
-        with col4:
-            a = st.number_input("A (mm)", min_value=0, value=175, step=1, key=f"a_cx_{i}")
-        with col5:
-            qtd = st.number_input("Qtd", min_value=1, value=2500, step=1, key=f"q_cx_{i}")
+    is_chapa = modelo in ["Cinta-Tab-Chapa", "Corte e Vinco"]
+    
+    with col2:
+        c = st.number_input("C (mm)", min_value=0, value=240, step=1, key=f"c_{i}")
+    with col3:
+        l = st.number_input("L (mm)", min_value=0, value=180, step=1, key=f"l_{i}")
+    with col4:
+        # Se for chapa, a altura não entra no cálculo, então desabilitamos o campo para manter o layout limpo
+        a = st.number_input("A (mm)", min_value=0, value=0 if is_chapa else 175, step=1, disabled=is_chapa, key=f"a_{i}")
+    with col5:
+        qtd = st.number_input("Qtd", min_value=1, value=2500, step=1, key=f"q_{i}")
+        
+    transp_sup = transp_inf = 0
+    if modelo == "Transpassadas":
+        t_col1, t_col2 = st.columns(2)
+        with t_col1:
+            transp_sup = st.number_input("Transpasse Sup (mm)", min_value=0, value=40, step=1, key=f"ts_{i}")
+        with t_col2:
+            transp_inf = st.number_input("Transpasse Inf (mm)", min_value=0, value=40, step=1, key=f"ti_{i}")
             
-        transp_sup = transp_inf = 0
-        if modelo == "Transpassadas":
-            t_col1, t_col2 = st.columns(2)
-            with t_col1:
-                transp_sup = st.number_input("Transpasse Sup (mm)", min_value=0, value=40, step=1, key=f"ts_{i}")
-            with t_col2:
-                transp_inf = st.number_input("Transpasse Inf (mm)", min_value=0, value=40, step=1, key=f"ti_{i}")
-                
-        itens_para_calcular.append({
-            'nome': f"Caixa {i+1}",
-            'modelo': modelo,
-            'c': c, 'l': l, 'a': a, 'qtd': qtd,
-            'transp_sup': transp_sup, 'transp_inf': transp_inf,
-            'desc': f"C {c} x L {l} x A {a} - {modelo}"
-        })
-else:
-    for i in range(st.session_state.num_itens):
-        st.markdown(f"**Item {i+1}**")
-        col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-        with col1:
-            modelo = st.selectbox("Tipo", ["Cinta-Tab-Chapa", "Corte e Vinco"], key=f"mod_ch_{i}")
-        with col2:
-            c = st.number_input("C (mm)", min_value=0, value=390, step=1, key=f"c_ch_{i}")
-        with col3:
-            l = st.number_input("L (mm)", min_value=0, value=260, step=1, key=f"l_ch_{i}")
-        with col4:
-            qtd = st.number_input("Quantidade", min_value=1, value=8000, step=1, key=f"q_ch_{i}")
-            
-        itens_para_calcular.append({
-            'nome': f"Item {i+1}",
-            'modelo': modelo,
-            'c': c, 'l': l, 'qtd': qtd,
-            'desc': f"C {c} x L {l} - {modelo}"
-        })
+    if is_chapa:
+        desc = f"C {c} x L {l} - {modelo}"
+    else:
+        desc = f"C {c} x L {l} x A {a} - {modelo}"
+        
+    itens_para_calcular.append({
+        'nome': f"Item {i+1}",
+        'modelo': modelo,
+        'c': c, 'l': l, 'a': a, 'qtd': qtd,
+        'transp_sup': transp_sup, 'transp_inf': transp_inf,
+        'desc': desc
+    })
 
-st.button("➕ ADICIONAR " + ("CAIXA" if tipo_produto == "Caixa Maleta (Modelos Específicos)" else "ITEM"), on_click=adicionar_item)
+st.button("➕ ADICIONAR ITEM", on_click=adicionar_item)
 
 st.markdown("---")
 
@@ -95,7 +90,7 @@ def formata_qtd(quantidade):
 
 if st.button("Calcular"):
     if preco_kg <= 0 or gramatura <= 0:
-        st.error("Insira os parâmetros base (Preço e Gramatura).")
+        st.error("Insira os parâmetros base (Preço e Gramatura maiores que zero).")
     else:
         resultados = []
         valor_total_pedido = 0.0
@@ -106,25 +101,23 @@ if st.button("Calcular"):
 
         for it in itens_para_calcular:
             area_m2 = 0.0
+            c, l, a = it['c'], it['l'], it['a']
             
-            if tipo_produto == "Caixa Maleta (Modelos Específicos)":
-                c, l, a = it['c'], it['l'], it['a']
-                if it['modelo'] == "Abas Normais":
-                    area_m2 = ((c + l) * 2 * (l + a) * 1.1) / 1000000
-                elif it['modelo'] == "Aba Dupla / Total":
-                    area_m2 = (((c + l) * 2) * (l + l + a) * 1.1) / 1000000
-                elif it['modelo'] == "Aba Dupla Inferior ou Superior":
-                    area_m2 = (((c + l) * 2) * (l + (l / 2) + a) * 1.1) / 1000000
-                elif it['modelo'] == "Sem Aba Superior":
-                    area_m2 = ((c + l) * 2 * ((l / 2) + a) * 1.1) / 1000000
-                elif it['modelo'] == "Transpassadas":
-                    area_m2 = ((c + l) * 2 * (l + a + it['transp_sup'] + it['transp_inf']) * 1.1) / 1000000
-            else:
-                c, l = it['c'], it['l']
-                if it['modelo'] == "Cinta-Tab-Chapa":
-                    area_m2 = (c * l) / 1000000
-                elif it['modelo'] == "Corte e Vinco":
-                    area_m2 = ((c + 30) * (l + 30)) / 1000000
+            # Cálculo Área
+            if it['modelo'] == "Abas Normais":
+                area_m2 = ((c + l) * 2 * (l + a) * 1.1) / 1000000
+            elif it['modelo'] == "Aba Dupla / Total":
+                area_m2 = (((c + l) * 2) * (l + l + a) * 1.1) / 1000000
+            elif it['modelo'] == "Aba Dupla Inferior ou Superior":
+                area_m2 = (((c + l) * 2) * (l + (l / 2) + a) * 1.1) / 1000000
+            elif it['modelo'] == "Sem Aba Superior":
+                area_m2 = ((c + l) * 2 * ((l / 2) + a) * 1.1) / 1000000
+            elif it['modelo'] == "Transpassadas":
+                area_m2 = ((c + l) * 2 * (l + a + it['transp_sup'] + it['transp_inf']) * 1.1) / 1000000
+            elif it['modelo'] == "Cinta-Tab-Chapa":
+                area_m2 = (c * l) / 1000000
+            elif it['modelo'] == "Corte e Vinco":
+                area_m2 = ((c + 30) * (l + 30)) / 1000000
             
             if area_m2 > 0:
                 peso_unit_kg = (area_m2 * gramatura) / 1000
@@ -134,7 +127,7 @@ if st.button("Calcular"):
                 preco_total = preco_unit * it['qtd']
                 valor_total_pedido += preco_total
                 
-                # Cálculos de Negociação
+                # Negociação
                 qtd_300 = int(300 / peso_unit_kg) if peso_unit_kg > 0 else 0
                 preco_unit_300 = peso_unit_kg * preco_efetivo_300
                 valor_300 = qtd_300 * preco_unit_300
@@ -149,6 +142,7 @@ if st.button("Calcular"):
                 resultados.append({
                     'nome': it['nome'],
                     'desc': it['desc'],
+                    'peso_unit_kg': peso_unit_kg,
                     'preco_unit': preco_unit,
                     'peso_total': peso_total_kg,
                     'preco_total': preco_total,
@@ -158,21 +152,50 @@ if st.button("Calcular"):
                 })
 
         if not resultados:
-            st.warning("Verifique as dimensões. Não foi possível calcular nenhum item.")
+            st.warning("Não foi possível calcular nenhum item. Verifique as dimensões inseridas.")
         else:
             st.markdown("""
             <style>
-            .resumo-box {
-                background-color: #F8F9F9;
-                border-left: 6px solid #2C3E50;
-                padding: 20px;
+            .card-azul {
+                background-color: #EBF5FB;
+                border-left: 6px solid #2874A6;
+                padding: 15px;
                 border-radius: 5px;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
             }
-            .linha-resumo {
+            .header-azul {
                 font-size: 1.1em;
-                margin-bottom: 10px;
-                color: #333;
+                font-weight: bold;
+                color: #2874A6;
+                margin-bottom: 15px;
+                border-bottom: 1px solid #BDC3C7;
+                padding-bottom: 5px;
+            }
+            .flex-container {
+                display: flex;
+                justify-content: space-between;
+                text-align: center;
+            }
+            .flex-item {
+                flex: 1;
+            }
+            .titulo-campo {
+                font-size: 0.9em;
+                color: #555;
+                font-weight: bold;
+            }
+            .valor-campo {
+                font-size: 1.4em;
+                color: #000;
+                font-weight: bold;
+            }
+            .valor-destaque {
+                color: #239B56;
+            }
+            .sub-valor {
+                font-size: 0.85em;
+                color: #777;
+                margin-top: 3px;
             }
             .total-box {
                 background-color: #EAFAF1;
@@ -180,7 +203,7 @@ if st.button("Calcular"):
                 padding: 20px;
                 border-radius: 5px;
                 text-align: center;
-                margin-bottom: 30px;
+                margin: 25px 0;
             }
             .card-laranja {
                 background-color: #FEF5E7;
@@ -189,38 +212,56 @@ if st.button("Calcular"):
                 border-radius: 5px;
                 margin-bottom: 15px;
             }
-            .ref-linha {
+            .header-laranja {
                 font-size: 1.1em;
-                margin-bottom: 5px;
-                color: #333;
-            }
-            .texto-recibo {
-                color: #FF0000;
                 font-weight: bold;
-                border-top: 1px solid #ccc;
-                padding-top: 8px;
-                margin-top: 8px;
+                color: #D68910;
+                margin-bottom: 10px;
+                border-bottom: 1px solid #F5CBA7;
+                padding-bottom: 5px;
+            }
+            .linha-neg {
+                font-size: 1em;
+                color: #333;
+                margin-bottom: 8px;
+                border-bottom: 1px dashed #FAD7A1;
+                padding-bottom: 5px;
+            }
+            .linha-neg:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
             }
             </style>
             """, unsafe_allow_html=True)
             
             st.markdown("### Resultados do Orçamento")
             
-            # Box único com a lista
-            html_lista = '<div class="resumo-box">'
+            # Renderizando os blocos azuis (um por item)
+            html_itens = ""
             for r in resultados:
-                html_lista += f"""
-                <div class="linha-resumo">
-                    <strong>{r['nome']} ({r['desc']})</strong> &nbsp;&gt;&nbsp; 
-                    Valor Unitário: <strong>{formata_moeda(r['preco_unit'])}</strong> &nbsp;&gt;&nbsp; 
-                    Peso total: <strong>{formata_peso(r['peso_total'])}</strong> &nbsp;&gt;&nbsp; 
-                    Valor Total: <strong style="color: #239B56;">{formata_moeda(r['preco_total'])}</strong>
+                html_itens += f"""
+                <div class="card-azul">
+                    <div class="header-azul">{r['nome']} ({r['desc']})</div>
+                    <div class="flex-container">
+                        <div class="flex-item">
+                            <div class="titulo-campo">Valor Unitário</div>
+                            <div class="valor-campo">{formata_moeda(r['preco_unit'])}</div>
+                        </div>
+                        <div class="flex-item">
+                            <div class="titulo-campo">Peso Total</div>
+                            <div class="valor-campo">{formata_peso(r['peso_total'])}</div>
+                            <div class="sub-valor">Peso unit.: {formata_peso(r['peso_unit_kg'])}</div>
+                        </div>
+                        <div class="flex-item">
+                            <div class="titulo-campo">Valor Total</div>
+                            <div class="valor-campo valor-destaque">{formata_moeda(r['preco_total'])}</div>
+                        </div>
+                    </div>
                 </div>
                 """
-            html_lista += '</div>'
-            st.markdown(html_lista, unsafe_allow_html=True)
+            st.markdown(html_itens, unsafe_allow_html=True)
             
-            # Valor Total
+            # Valor Total do Pedido (Caixa Verde)
             st.markdown(f"""
             <div class="total-box">
                 <div style="font-size: 1.2em; font-weight: bold; color: #333;">VALOR TOTAL DO PEDIDO</div>
@@ -228,20 +269,40 @@ if st.button("Calcular"):
             </div>
             """, unsafe_allow_html=True)
 
-            # Referências de Negociação Individuais
             st.markdown("### Referências para Negociação")
+            
+            # Bloco 300kg
+            html_300 = '<div class="card-laranja"><div class="header-laranja">Para 300kg</div>'
             for r in resultados:
-                st.markdown(f"""
-                <div class="card-laranja">
-                    <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 10px;">{r['nome']} ({r['desc']})</div>
-                    <div class="ref-linha">
-                        <strong>300kg:</strong> {formata_qtd(r['qtd_300'])} un &nbsp;|&nbsp; <strong>Unitário:</strong> {formata_moeda(r['preco_unit_300'])} &nbsp;|&nbsp; <strong>Total:</strong> {formata_moeda(r['valor_300'])}
-                    </div>
-                    <div class="ref-linha">
-                        <strong>1000kg:</strong> {formata_qtd(r['qtd_1000'])} un &nbsp;|&nbsp; <strong>Unitário:</strong> {formata_moeda(r['preco_unit_1000'])} &nbsp;|&nbsp; <strong>Total:</strong> {formata_moeda(r['valor_1000'])}
-                    </div>
-                    <div class="ref-linha texto-recibo">
-                        Preço Mediante Recibo ({formata_qtd(r['qtd_300'])} un) &nbsp;|&nbsp; Unitário: {formata_moeda(r['preco_unit_recibo'])} &nbsp;|&nbsp; Total: {formata_moeda(r['valor_recibo'])}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                html_300 += f"""
+                <div class="linha-neg">
+                    <strong>{r['nome']}:</strong> {formata_qtd(r['qtd_300'])} un &nbsp;|&nbsp; 
+                    Unitário: {formata_moeda(r['preco_unit_300'])} &nbsp;|&nbsp; 
+                    Total: <strong>{formata_moeda(r['valor_300'])}</strong>
+                </div>"""
+            html_300 += '</div>'
+            st.markdown(html_300, unsafe_allow_html=True)
+
+            # Bloco 1000kg
+            html_1000 = '<div class="card-laranja"><div class="header-laranja">Para 1000kg</div>'
+            for r in resultados:
+                html_1000 += f"""
+                <div class="linha-neg">
+                    <strong>{r['nome']}:</strong> {formata_qtd(r['qtd_1000'])} un &nbsp;|&nbsp; 
+                    Unitário: {formata_moeda(r['preco_unit_1000'])} &nbsp;|&nbsp; 
+                    Total: <strong>{formata_moeda(r['valor_1000'])}</strong>
+                </div>"""
+            html_1000 += '</div>'
+            st.markdown(html_1000, unsafe_allow_html=True)
+
+            # Bloco Recibo
+            html_recibo = '<div class="card-laranja" style="border-left-color: #E74C3C; background-color: #FDEDEC;"><div class="header-laranja" style="color: #C0392B; border-bottom-color: #F5B7B1;">Mediante Recibo (Base 300kg)</div>'
+            for r in resultados:
+                html_recibo += f"""
+                <div class="linha-neg" style="color: #C0392B;">
+                    <strong>{r['nome']}:</strong> {formata_qtd(r['qtd_300'])} un &nbsp;|&nbsp; 
+                    Unitário: {formata_moeda(r['preco_unit_recibo'])} &nbsp;|&nbsp; 
+                    Total: <strong>{formata_moeda(r['valor_recibo'])}</strong>
+                </div>"""
+            html_recibo += '</div>'
+            st.markdown(html_recibo, unsafe_allow_html=True)
