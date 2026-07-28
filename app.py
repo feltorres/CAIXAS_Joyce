@@ -96,11 +96,15 @@ if st.button("Calcular"):
         preco_efetivo_300 = preco_300 if preco_300 > 0 else preco_kg
         preco_efetivo_1000 = preco_1000 if preco_1000 > 0 else preco_kg
         
+        # Cálculos para 300kg
         qtd_300 = int(300 / peso_unit_kg)
-        valor_300 = qtd_300 * (peso_unit_kg * preco_efetivo_300)
+        preco_unit_300 = peso_unit_kg * preco_efetivo_300
+        valor_300 = qtd_300 * preco_unit_300
         
+        # Cálculos para 1000kg
         qtd_1000 = int(1000 / peso_unit_kg)
-        valor_1000 = qtd_1000 * (peso_unit_kg * preco_efetivo_1000)
+        preco_unit_1000 = peso_unit_kg * preco_efetivo_1000
+        valor_1000 = qtd_1000 * preco_unit_1000
         
         st.markdown("""
         <style>
@@ -172,10 +176,10 @@ if st.button("Calcular"):
         <div class="card-laranja">
             <div class="titulo-card" style="margin-bottom: 15px; font-size: 1.2em;">Referências para Negociação</div>
             <div class="ref-linha">
-                <strong>Quantidade para 300kg:</strong> {formata_qtd(qtd_300)} unidades &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Total:</strong> {formata_moeda(valor_300)}
+                <strong>Quantidade para 300kg:</strong> {formata_qtd(qtd_300)} un &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Preço unitário:</strong> {formata_moeda(preco_unit_300)} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Total:</strong> {formata_moeda(valor_300)}
             </div>
             <div class="ref-linha" style="margin-bottom: 0;">
-                <strong>Quantidade para 1000kg:</strong> {formata_qtd(qtd_1000)} unidades &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Total:</strong> {formata_moeda(valor_1000)}
+                <strong>Quantidade para 1000kg:</strong> {formata_qtd(qtd_1000)} un &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Preço unitário:</strong> {formata_moeda(preco_unit_1000)} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Total:</strong> {formata_moeda(valor_1000)}
             </div>
         </div>
         """, unsafe_allow_html=True)
