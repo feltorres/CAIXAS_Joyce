@@ -174,7 +174,7 @@ if st.button("Calcular"):
             <span class="titulo-card">Valor unitário:</span> 
             <span class="valor-card">{formata_moeda(preco_unit)}</span>
             <span style="font-size: 1.5em; margin: 0 15px; color: #239B56;">&mdash;</span>
-            <span class="titulo-card">Total para {formata_qtd(qtd)} un:</span> 
+            <span class="titulo-card">Total ({formata_qtd(qtd)}und):</span> 
             <span class="valor-card">{formata_moeda(preco_total)}</span>
         </div>
         """, unsafe_allow_html=True)
