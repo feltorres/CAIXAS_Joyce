@@ -328,7 +328,7 @@ if st.button("Calcular"):
                 else:
                     dim_str = f"C {r['c']} x L {r['l']} x A {r['a']} mm"
                 
-                whatsapp_msg += f"📦{r['nome']} - {r['modelo']}\n"
+                whatsapp_msg += f"*📦{r['nome']} - {r['modelo']}*\n"
                 whatsapp_msg += f" {dim_str} - Gramatura {r['gramatura']}g\n"
                 whatsapp_msg += f"* Quantidade: {formata_qtd(r['qtd'])} un\n"
                 whatsapp_msg += f"* Preço Unitário: {formata_moeda(r['preco_unit'])}\n"
@@ -338,7 +338,7 @@ if st.button("Calcular"):
             whatsapp_msg += "* Prazo de Produção - 20 a 25 dias ÚTEIS\n"
             whatsapp_msg += "* IPI - 0%\n\n"
             whatsapp_msg += "🚚 FRETE CIF - BH E REGIÃO\n\n"
-            whatsapp_msg += "Obs: as medidas apresentadas são internas."
+            whatsapp_msg += "*Obs: as medidas apresentadas são internas.*"
 
             st.markdown("""
             <div class="card-azul" style="margin-top: 10px; margin-bottom: 5px;">
