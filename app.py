@@ -152,6 +152,8 @@ if st.button("Calcular"):
                 resultados.append({
                     'nome': it['nome'],
                     'desc': it['desc'],
+                    'gramatura': it['gramatura'],
+                    'qtd': it['qtd'],
                     'peso_unit_kg': peso_unit_kg,
                     'preco_unit': preco_unit,
                     'peso_total': peso_total_kg,
@@ -250,8 +252,12 @@ if st.button("Calcular"):
             for r in resultados:
                 html_itens += f"""
                 <div class="card-azul">
-                    <div class="header-azul">{r['nome']} ({r['desc']})</div>
+                    <div class="header-azul">{r['nome']} ({r['desc']}) - Gramatura {r['gramatura']}g</div>
                     <div class="flex-container">
+                        <div class="flex-item">
+                            <div class="titulo-campo">Quantidade</div>
+                            <div class="valor-campo">{formata_qtd(r['qtd'])} un</div>
+                        </div>
                         <div class="flex-item">
                             <div class="titulo-campo">Valor Unitário</div>
                             <div class="valor-campo">{formata_moeda(r['preco_unit'])}</div>
