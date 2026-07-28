@@ -3,16 +3,18 @@ import streamlit as st
 st.set_page_config(page_title="Orçamento - Caixas de Papelão", layout="wide")
 st.title("Sistema de Orçamento - Caixas e Chapas de Papelão")
 
-# Controle de sessão para múltiplas linhas
-if 'num_itens' not in st.session_state:
-    st.session_state.num_itens = 1
+# Controle de sessão para múltiplas linhas com IDs únicos
+if 'item_ids' not in st.session_state:
+    st.session_state.item_ids = [0]
+    st.session_state.next_id = 1
 
 def adicionar_item():
-    st.session_state.num_itens += 1
+    st.session_state.item_ids.append(st.session_state.next_id)
+    st.session_state.next_id += 1
 
-def remover_item():
-    if st.session_state.num_itens > 1:
-        st.session_state.num_itens -= 1
+def remover_item(item_id):
+    if len(st.session_state.item_ids) > 1:
+        st.session_state.item_ids.remove(item_id)
 
 st.sidebar.header("Parâmetros Base")
 preco_kg = st.sidebar.number_input("Preço do KG do Papelão (R$)", min_value=0.0, value=0.0, step=0.1)
@@ -37,32 +39,36 @@ opcoes_modelos = [
     "Corte e Vinco"
 ]
 
-for i in range(st.session_state.num_itens):
-    st.markdown(f"**Item {i+1}**")
+for idx, item_id in enumerate(st.session_state.item_ids):
+    st.markdown(f"**Item {idx+1}**")
     
-    col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+    # 6 Colunas: A última para o botão de remoção (X vermelho)
+    col1, col2, col3, col4, col5, col6 = st.columns([2.5, 1, 1, 1, 1, 0.5])
     
     with col1:
-        modelo = st.selectbox("Modelo", opcoes_modelos, key=f"mod_{i}")
+        modelo = st.selectbox("Modelo", opcoes_modelos, key=f"mod_{item_id}")
         
     is_chapa = modelo in ["Cinta-Tab-Chapa", "Corte e Vinco"]
     
     with col2:
-        c = st.number_input("C (mm)", min_value=0, value=240, step=1, key=f"c_{i}")
+        c = st.number_input("C (mm)", min_value=0, value=240, step=1, key=f"c_{item_id}")
     with col3:
-        l = st.number_input("L (mm)", min_value=0, value=180, step=1, key=f"l_{i}")
+        l = st.number_input("L (mm)", min_value=0, value=180, step=1, key=f"l_{item_id}")
     with col4:
-        a = st.number_input("A (mm)", min_value=0, value=0 if is_chapa else 175, step=1, disabled=is_chapa, key=f"a_{i}")
+        a = st.number_input("A (mm)", min_value=0, value=0 if is_chapa else 175, step=1, disabled=is_chapa, key=f"a_{item_id}")
     with col5:
-        qtd = st.number_input("Qtd", min_value=1, value=2500, step=1, key=f"q_{i}")
+        qtd = st.number_input("Qtd", min_value=1, value=2500, step=1, key=f"q_{item_id}")
+    with col6:
+        st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
+        st.button("❌", key=f"rm_{item_id}", on_click=remover_item, args=(item_id,), disabled=len(st.session_state.item_ids) == 1, help="Remover este item")
         
     transp_sup = transp_inf = 0
     if modelo == "Transpassadas":
         t_col1, t_col2 = st.columns(2)
         with t_col1:
-            transp_sup = st.number_input("Transpasse Sup (mm)", min_value=0, value=40, step=1, key=f"ts_{i}")
+            transp_sup = st.number_input("Transpasse Sup (mm)", min_value=0, value=40, step=1, key=f"ts_{item_id}")
         with t_col2:
-            transp_inf = st.number_input("Transpasse Inf (mm)", min_value=0, value=40, step=1, key=f"ti_{i}")
+            transp_inf = st.number_input("Transpasse Inf (mm)", min_value=0, value=40, step=1, key=f"ti_{item_id}")
             
     if is_chapa:
         desc = f"C {c} x L {l} - {modelo}"
@@ -70,18 +76,16 @@ for i in range(st.session_state.num_itens):
         desc = f"C {c} x L {l} x A {a} - {modelo}"
         
     itens_para_calcular.append({
-        'nome': f"Item {i+1}",
+        'nome': f"Item {idx+1}",
         'modelo': modelo,
         'c': c, 'l': l, 'a': a, 'qtd': qtd,
         'transp_sup': transp_sup, 'transp_inf': transp_inf,
         'desc': desc
     })
 
-col_btn1, col_btn2, _ = st.columns([2, 2, 6])
+col_btn1, _ = st.columns([2, 8])
 with col_btn1:
     st.button("➕ ADICIONAR ITEM", on_click=adicionar_item, use_container_width=True)
-with col_btn2:
-    st.button("➖ REMOVER ITEM", on_click=remover_item, disabled=st.session_state.num_itens <= 1, use_container_width=True)
 
 st.markdown("---")
 
