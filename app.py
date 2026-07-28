@@ -113,19 +113,21 @@ if st.button("Calcular"):
         
         st.markdown("""
         <style>
-        .card-azul {
-            background-color: #EBF5FB;
-            border-left: 6px solid #2874A6;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
         .card-verde {
             background-color: #EAFAF1;
             border-left: 6px solid #239B56;
-            padding: 15px;
+            padding: 20px;
             border-radius: 5px;
             margin-bottom: 15px;
+            text-align: center;
+        }
+        .card-azul {
+            background-color: #EBF5FB;
+            border-left: 6px solid #2874A6;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
         }
         .card-laranja {
             background-color: #FEF5E7;
@@ -138,16 +140,15 @@ if st.button("Calcular"):
             font-size: 1.1em;
             font-weight: bold;
             color: #333;
-            margin-bottom: 5px;
         }
         .valor-card {
             font-size: 1.5em;
             color: #000;
         }
         .peso-unitario-pequeno {
-            font-size: 0.9em;
+            font-size: 0.85em;
             color: #555;
-            margin-top: 2px;
+            margin-top: 5px;
         }
         .ref-linha {
             font-size: 1.2em;
@@ -167,32 +168,29 @@ if st.button("Calcular"):
         
         st.markdown("### Resultados")
         
-        col_azul, col_verde = st.columns(2)
-        
-        with col_azul:
-            st.markdown(f"""
-            <div class="card-azul">
-                <div class="titulo-card">Valor unitário:</div>
-                <div class="valor-card">{formata_moeda(preco_unit)}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        with col_verde:
-            st.markdown(f"""
-            <div class="card-verde">
-                <div class="titulo-card">Valor total para {formata_qtd(qtd)} un:</div>
-                <div class="valor-card">{formata_moeda(preco_total)}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
+        # Quadro 1: Valores (Verde)
         st.markdown(f"""
-        <div class="card-azul" style="background-color: #EBF5FB; border-left: 6px solid #2874A6;">
-            <div class="titulo-card">Peso Total:</div>
-            <div class="valor-card">{formata_peso(peso_total_kg)}</div>
+        <div class="card-verde">
+            <span class="titulo-card">Valor unitário:</span> 
+            <span class="valor-card">{formata_moeda(preco_unit)}</span>
+            <span style="font-size: 1.5em; margin: 0 15px; color: #239B56;">&mdash;</span>
+            <span class="titulo-card">Total para {formata_qtd(qtd)} un:</span> 
+            <span class="valor-card">{formata_moeda(preco_total)}</span>
+        </div>
+        """, unsafe_allow_html=True)
+            
+        # Quadro 2: Pesos (Azul)
+        st.markdown(f"""
+        <div class="card-azul">
+            <div>
+                <span class="titulo-card">Peso Total:</span> 
+                <span class="valor-card">{formata_peso(peso_total_kg)}</span>
+            </div>
             <div class="peso-unitario-pequeno">Peso unitário: {formata_peso(peso_unit_kg)}</div>
         </div>
         """, unsafe_allow_html=True)
             
+        # Quadro 3: Negociação (Laranja)
         st.markdown(f"""
         <div class="card-laranja">
             <div class="titulo-card" style="margin-bottom: 15px; font-size: 1.2em;">Referências para Negociação</div>
