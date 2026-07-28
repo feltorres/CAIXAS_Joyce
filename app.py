@@ -10,6 +10,10 @@ if 'num_itens' not in st.session_state:
 def adicionar_item():
     st.session_state.num_itens += 1
 
+def remover_item():
+    if st.session_state.num_itens > 1:
+        st.session_state.num_itens -= 1
+
 st.sidebar.header("Parâmetros Base")
 preco_kg = st.sidebar.number_input("Preço do KG do Papelão (R$)", min_value=0.0, value=0.0, step=0.1)
 gramatura = st.sidebar.number_input("Gramatura (g/m²)", min_value=0, value=378, step=1)
@@ -36,7 +40,6 @@ opcoes_modelos = [
 for i in range(st.session_state.num_itens):
     st.markdown(f"**Item {i+1}**")
     
-    # Linha principal de inputs
     col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
     
     with col1:
@@ -49,7 +52,6 @@ for i in range(st.session_state.num_itens):
     with col3:
         l = st.number_input("L (mm)", min_value=0, value=180, step=1, key=f"l_{i}")
     with col4:
-        # Se for chapa, a altura não entra no cálculo, então desabilitamos o campo para manter o layout limpo
         a = st.number_input("A (mm)", min_value=0, value=0 if is_chapa else 175, step=1, disabled=is_chapa, key=f"a_{i}")
     with col5:
         qtd = st.number_input("Qtd", min_value=1, value=2500, step=1, key=f"q_{i}")
@@ -75,7 +77,11 @@ for i in range(st.session_state.num_itens):
         'desc': desc
     })
 
-st.button("➕ ADICIONAR ITEM", on_click=adicionar_item)
+col_btn1, col_btn2, _ = st.columns([2, 2, 6])
+with col_btn1:
+    st.button("➕ ADICIONAR ITEM", on_click=adicionar_item, use_container_width=True)
+with col_btn2:
+    st.button("➖ REMOVER ITEM", on_click=remover_item, disabled=st.session_state.num_itens <= 1, use_container_width=True)
 
 st.markdown("---")
 
@@ -103,7 +109,6 @@ if st.button("Calcular"):
             area_m2 = 0.0
             c, l, a = it['c'], it['l'], it['a']
             
-            # Cálculo Área
             if it['modelo'] == "Abas Normais":
                 area_m2 = ((c + l) * 2 * (l + a) * 1.1) / 1000000
             elif it['modelo'] == "Aba Dupla / Total":
@@ -127,7 +132,6 @@ if st.button("Calcular"):
                 preco_total = preco_unit * it['qtd']
                 valor_total_pedido += preco_total
                 
-                # Negociação
                 qtd_300 = int(300 / peso_unit_kg) if peso_unit_kg > 0 else 0
                 preco_unit_300 = peso_unit_kg * preco_efetivo_300
                 valor_300 = qtd_300 * preco_unit_300
@@ -236,7 +240,6 @@ if st.button("Calcular"):
             
             st.markdown("### Resultados do Orçamento")
             
-            # Renderizando os blocos azuis (um por item)
             html_itens = ""
             for r in resultados:
                 html_itens += f"""
@@ -261,7 +264,6 @@ if st.button("Calcular"):
                 """
             st.markdown(html_itens, unsafe_allow_html=True)
             
-            # Valor Total do Pedido (Caixa Verde)
             st.markdown(f"""
             <div class="total-box">
                 <div style="font-size: 1.2em; font-weight: bold; color: #333;">VALOR TOTAL DO PEDIDO</div>
@@ -271,36 +273,33 @@ if st.button("Calcular"):
 
             st.markdown("### Referências para Negociação")
             
-            # Bloco 300kg
             html_300 = '<div class="card-laranja"><div class="header-laranja">Para 300kg</div>'
             for r in resultados:
                 html_300 += f"""
                 <div class="linha-neg">
-                    <strong>{r['nome']}:</strong> {formata_qtd(r['qtd_300'])} un &nbsp;|&nbsp; 
+                    <strong>{r['nome']}:</strong> Quantidade: {formata_qtd(r['qtd_300'])} un &nbsp;|&nbsp; 
                     Unitário: {formata_moeda(r['preco_unit_300'])} &nbsp;|&nbsp; 
                     Total: <strong>{formata_moeda(r['valor_300'])}</strong>
                 </div>"""
             html_300 += '</div>'
             st.markdown(html_300, unsafe_allow_html=True)
 
-            # Bloco 1000kg
             html_1000 = '<div class="card-laranja"><div class="header-laranja">Para 1000kg</div>'
             for r in resultados:
                 html_1000 += f"""
                 <div class="linha-neg">
-                    <strong>{r['nome']}:</strong> {formata_qtd(r['qtd_1000'])} un &nbsp;|&nbsp; 
+                    <strong>{r['nome']}:</strong> Quantidade: {formata_qtd(r['qtd_1000'])} un &nbsp;|&nbsp; 
                     Unitário: {formata_moeda(r['preco_unit_1000'])} &nbsp;|&nbsp; 
                     Total: <strong>{formata_moeda(r['valor_1000'])}</strong>
                 </div>"""
             html_1000 += '</div>'
             st.markdown(html_1000, unsafe_allow_html=True)
 
-            # Bloco Recibo
             html_recibo = '<div class="card-laranja" style="border-left-color: #E74C3C; background-color: #FDEDEC;"><div class="header-laranja" style="color: #C0392B; border-bottom-color: #F5B7B1;">Mediante Recibo (Base 300kg)</div>'
             for r in resultados:
                 html_recibo += f"""
                 <div class="linha-neg" style="color: #C0392B;">
-                    <strong>{r['nome']}:</strong> {formata_qtd(r['qtd_300'])} un &nbsp;|&nbsp; 
+                    <strong>{r['nome']}:</strong> Quantidade: {formata_qtd(r['qtd_300'])} un &nbsp;|&nbsp; 
                     Unitário: {formata_moeda(r['preco_unit_recibo'])} &nbsp;|&nbsp; 
                     Total: <strong>{formata_moeda(r['valor_recibo'])}</strong>
                 </div>"""
