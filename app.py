@@ -4,15 +4,15 @@ st.set_page_config(page_title="Orçamento - Caixas de Papelão", layout="wide")
 st.title("Sistema de Orçamento - Caixas e Chapas de Papelão")
 
 st.sidebar.header("Parâmetros Base")
-preco_kg = st.sidebar.number_input("Preço do KG do Papelão (R$)", min_value=0.0, value=10.60, step=0.1)
+preco_kg = st.sidebar.number_input("Preço do KG do Papelão (R$)", min_value=0.0, value=0.0, step=0.1)
 gramatura = st.sidebar.number_input("Gramatura (g/m²)", min_value=0, value=378, step=1)
 
 st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
 
 st.sidebar.markdown("**Preços para Negociação (Opcional)**")
-preco_300 = st.sidebar.number_input("Preço do KG para 300kg (R$)", min_value=0.0, value=0.0, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
-preco_1000 = st.sidebar.number_input("Preço do KG para 1000kg (R$)", min_value=0.0, value=0.0, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
-preco_recibo = st.sidebar.number_input("Preço do KG mediante recibo (R$)", min_value=0.0, value=0.0, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
+preco_300 = st.sidebar.number_input("Preço do KG para 300kg (R$)", min_value=0.0, value=12.35, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
+preco_1000 = st.sidebar.number_input("Preço do KG para 1000kg (R$)", min_value=0.0, value=11.50, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
+preco_recibo = st.sidebar.number_input("Preço do KG mediante recibo (R$)", min_value=0.0, value=11.20, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
 
 tipo_produto = st.radio("O que deseja orçar?", ["Caixa Maleta (Modelos Específicos)", "Chapa / Corte e Vinco"])
 
@@ -202,4 +202,4 @@ if st.button("Calcular"):
         """, unsafe_allow_html=True)
         
     else:
-        st.error("Insira dimensões, gramatura e preço válidos.")
+        st.error("Insira as dimensões, o peso e certifique-se de que o Preço do KG base seja maior que zero.")
