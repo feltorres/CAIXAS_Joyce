@@ -133,19 +133,20 @@ if st.button("Calcular"):
                 peso_unit_kg = (area_m2 * it['gramatura']) / 1000
                 peso_total_kg = peso_unit_kg * it['qtd']
                 
-                preco_unit = peso_unit_kg * preco_kg
+                # ARREDONDAMENTO CORRIGIDO PARA BATER COM A CALCULADORA
+                preco_unit = round(peso_unit_kg * preco_kg, 2)
                 preco_total = preco_unit * it['qtd']
                 valor_total_pedido += preco_total
                 
                 qtd_300 = int(300 / peso_unit_kg) if peso_unit_kg > 0 else 0
-                preco_unit_300 = peso_unit_kg * preco_efetivo_300
+                preco_unit_300 = round(peso_unit_kg * preco_efetivo_300, 2)
                 valor_300 = qtd_300 * preco_unit_300
                 
                 qtd_1000 = int(1000 / peso_unit_kg) if peso_unit_kg > 0 else 0
-                preco_unit_1000 = peso_unit_kg * preco_efetivo_1000
+                preco_unit_1000 = round(peso_unit_kg * preco_efetivo_1000, 2)
                 valor_1000 = qtd_1000 * preco_unit_1000
                 
-                preco_unit_recibo = peso_unit_kg * preco_efetivo_recibo
+                preco_unit_recibo = round(peso_unit_kg * preco_efetivo_recibo, 2)
                 valor_recibo = qtd_300 * preco_unit_recibo
 
                 resultados.append({
