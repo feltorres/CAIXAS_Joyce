@@ -22,7 +22,7 @@ preco_kg = st.sidebar.number_input("Preço do KG do Papelão (R$)", min_value=0.
 st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
 st.sidebar.markdown("**Preços para Negociação (Opcional)**")
 preco_300 = st.sidebar.number_input("Preço do KG para 300kg (R$)", min_value=0.0, value=12.35, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
-preco_1000 = st.sidebar.number_input("Preço do KG para 1000kg (R$)", min_value=0.0, value=11.50, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
+preco_1000 = st.sidebar.number_input("Preço do KG para 1000kg (R$)", min_value=0.0, value=11.70, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
 preco_recibo = st.sidebar.number_input("Preço do KG mediante recibo (R$)", min_value=0.0, value=11.20, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
 
 st.markdown("---")
