@@ -22,7 +22,7 @@ preco_kg = st.sidebar.number_input("Preço do KG do Papelão (R$)", min_value=0.
 st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
 st.sidebar.markdown("**Preços para Negociação (Opcional)**")
 preco_300 = st.sidebar.number_input("Preço do KG para 300kg (R$)", min_value=0.0, value=12.35, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
-preco_1000 = st.sidebar.number_input("Preço do KG para 1000kg (R$)", min_value=0.0, value=11.50, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
+preco_1000 = st.sidebar.number_input("Preço do KG para 1000kg (R$)", min_value=0.0, value=11.70, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
 preco_recibo = st.sidebar.number_input("Preço do KG mediante recibo (R$)", min_value=0.0, value=11.20, step=0.1, help="Deixe 0.0 para usar o preço padrão.")
 
 st.markdown("---")
@@ -41,7 +41,6 @@ opcoes_modelos = [
 for idx, item_id in enumerate(st.session_state.item_ids):
     st.markdown(f"**Item {idx+1}**")
     
-    # 7 Colunas para abrigar a Gramatura entre Modelo e C
     col1, col2, col3, col4, col5, col6, col7 = st.columns([2.2, 1.3, 1, 1, 1, 1, 0.5])
     
     with col1:
@@ -134,24 +133,27 @@ if st.button("Calcular"):
                 peso_unit_kg = (area_m2 * it['gramatura']) / 1000
                 peso_total_kg = peso_unit_kg * it['qtd']
                 
-                preco_unit = peso_unit_kg * preco_kg
+                # ARREDONDAMENTO CORRIGIDO PARA BATER COM A CALCULADORA
+                preco_unit = round(peso_unit_kg * preco_kg, 2)
                 preco_total = preco_unit * it['qtd']
                 valor_total_pedido += preco_total
                 
                 qtd_300 = int(300 / peso_unit_kg) if peso_unit_kg > 0 else 0
-                preco_unit_300 = peso_unit_kg * preco_efetivo_300
+                preco_unit_300 = round(peso_unit_kg * preco_efetivo_300, 2)
                 valor_300 = qtd_300 * preco_unit_300
                 
                 qtd_1000 = int(1000 / peso_unit_kg) if peso_unit_kg > 0 else 0
-                preco_unit_1000 = peso_unit_kg * preco_efetivo_1000
+                preco_unit_1000 = round(peso_unit_kg * preco_efetivo_1000, 2)
                 valor_1000 = qtd_1000 * preco_unit_1000
                 
-                preco_unit_recibo = peso_unit_kg * preco_efetivo_recibo
+                preco_unit_recibo = round(peso_unit_kg * preco_efetivo_recibo, 2)
                 valor_recibo = qtd_300 * preco_unit_recibo
 
                 resultados.append({
                     'nome': it['nome'],
                     'desc': it['desc'],
+                    'modelo': it['modelo'],
+                    'c': c, 'l': l, 'a': a,
                     'gramatura': it['gramatura'],
                     'qtd': it['qtd'],
                     'peso_unit_kg': peso_unit_kg,
@@ -307,7 +309,7 @@ if st.button("Calcular"):
             html_1000 += '</div>'
             st.markdown(html_1000, unsafe_allow_html=True)
 
-            html_recibo = '<div class="card-laranja" style="border-left-color: #E74C3C; background-color: #FDEDEC;"><div class="header-laranja" style="color: #C0392B; border-bottom-color: #F5B7B1;">Mediante Recibo (Base 300kg)</div>'
+            html_recibo = '<div class="card-laranja" style="border-left-color: #E74C3C; background-color: #FDEDEC; margin-bottom: 30px;"><div class="header-laranja" style="color: #C0392B; border-bottom-color: #F5B7B1;">Mediante Recibo (Base 300kg)</div>'
             for r in resultados:
                 html_recibo += f"""
                 <div class="linha-neg" style="color: #C0392B;">
@@ -317,3 +319,33 @@ if st.button("Calcular"):
                 </div>"""
             html_recibo += '</div>'
             st.markdown(html_recibo, unsafe_allow_html=True)
+
+            # Construção da string para o WhatsApp
+            whatsapp_msg = "Segue seu orçamento, conforme solicitado:\n\n"
+            for i, r in enumerate(resultados):
+                is_chapa = r['modelo'] in ["Cinta-Tab-Chapa", "Corte e Vinco"]
+                if is_chapa:
+                    dim_str = f"C {r['c']} x L {r['l']} mm"
+                else:
+                    dim_str = f"C {r['c']} x L {r['l']} x A {r['a']} mm"
+                
+                whatsapp_msg += f"*📦{r['nome']} - {r['modelo']}*\n"
+                whatsapp_msg += f" {dim_str} - Gramatura {r['gramatura']}g\n"
+                whatsapp_msg += f"* Quantidade: {formata_qtd(r['qtd'])} un\n"
+                whatsapp_msg += f"* Preço Unitário: {formata_moeda(r['preco_unit'])}\n"
+                whatsapp_msg += f"* Valor total: {formata_moeda(r['preco_total'])}\n\n"
+            
+            whatsapp_msg += "* __ IMPRESSÃO\n"
+            whatsapp_msg += "* Prazo de Produção - 20 a 25 dias ÚTEIS\n"
+            whatsapp_msg += "* IPI - 0%\n\n"
+            whatsapp_msg += "🚚 FRETE CIF - BH E REGIÃO\n\n"
+            whatsapp_msg += "*Obs: as medidas apresentadas são internas.*"
+
+            st.markdown("""
+            <div class="card-azul" style="margin-top: 10px; margin-bottom: 5px;">
+                <div class="header-azul" style="margin-bottom: 5px; border: none;">📱 Mensagem para WhatsApp</div>
+                <div style="font-size: 0.9em; color: #555;">Copie o texto abaixo para enviar ao cliente:</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.code(whatsapp_msg, language="markdown")
